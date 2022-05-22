@@ -4,6 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import make_password
 
 from .models import Faculty
 
@@ -31,7 +32,9 @@ class FacultyRegistrationSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        return super(FacultyRegistrationSerializer, self).create(validated_data)
+        data = super().create(validated_data)
+        data.set_password(make_password(validated_data['password']))
+        return data     
 
     def get_token(self, obj):
         refresh = RefreshToken.for_user(obj)
