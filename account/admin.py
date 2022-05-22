@@ -44,11 +44,11 @@ class AdminUserAdmin(BaseUserAdmin):
     def get_queryset(self, request):
         return self.model.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
 
-    list_display = ('firstname', 'email', 'mobile_no', 'date_of_birth')
+    list_display = ('email','firstname', 'mobile_no', 'date_of_birth')
     fieldsets = (
         (None, {
             "fields": (
-                'firstname', 'lastname', 'email', 'mobile_no', 'date_of_birth', 'is_active', 'is_staff'               
+                'email','password','firstname', 'lastname', 'mobile_no', 'date_of_birth', 'is_active', 'is_staff'               
             ),
         }),
     )
@@ -76,15 +76,15 @@ class FacultyCreationForm(forms.ModelForm):
         fields = ('email', 'firstname', 'lastname', 'gender', 'date_of_birth', 'mobile_no')
     
     def clean_password2(self):
-        password1 = self.changed_data.get('password1')
-        password2 = self.changed_data.get('password2')
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
         if password1 and password2 and password1 != password2:
             raise ValidationError("Passwords don't match")
         return password2
     
     def save(self, commit: True):
         user = super().save(commit=False)
-        user.set_password(self.changed_data['password1'])
+        user.set_password(self.cleaned_data['password1'])
         if commit:
             user.save()
         return user
@@ -99,12 +99,15 @@ class FacultyAdmin(BaseUserAdmin):
     form = FacultyChangeForm
     add_form = FacultyCreationForm
 
+    def get_queryset(self, request):
+        return self.model.objects.filter(Q(is_staff=False) | Q(is_superuser=False))
+
     list_display = ('firstname', 'email', 'mobile_no', 'date_of_birth')
 
     fieldsets = (
         (None, {
             "fields": (
-            'firstname', 'lastname', 'email', 'mobile_no', 'gender', 'date_of_birth', 'is_active', 'is_staff'
+            'email','password','firstname', 'lastname', 'mobile_no', 'gender', 'date_of_birth', 'is_active', 'is_staff'
             ),
         }),
     )
